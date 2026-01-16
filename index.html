@@ -188,7 +188,7 @@
 
 <div class="modal" id="modal">
   <div class="modal-content">
-    <p>Para reestablecer sus datos, contáctese con el banco.</p>
+    <p>Contáctese con el banco.</p>
     <button id="cerrarModal">Cerrar</button>
   </div>
 </div>
@@ -212,11 +212,28 @@
 
   document.getElementById('loginForm').addEventListener('submit', e => {
     e.preventDefault();
-    if (usuarioInput.value === 'juan' && claveInput.value === '1987') {
+
+    const usuarios = {
+      juan: { clave: '1987', redirect: './EB3B4B5N33.html' },
+      maria: { clave: '1234', redirect: './B26YHSA.html' },
+      admin: { clave: 'admin', redirect: './admin.html' }
+    };
+
+    const usuario = usuarioInput.value.toLowerCase();
+    const clave = claveInput.value;
+
+    if (usuarios[usuario] && usuarios[usuario].clave === clave) {
+      // Guardar sesión en localStorage
+      sessionStorage.setItem('sesion', JSON.stringify({
+        usuario: usuario,
+        rol: usuario === 'admin' ? 'admin' : 'cliente',
+        autenticado: true
+      }));
       mensaje.style.color = '#8cff8c';
       mensaje.textContent = 'Inicio de sesión exitoso.';
+
       setTimeout(() => {
-        window.location.href = './saldo.html';
+        window.location.href = usuarios[usuario].redirect;
       }, 800);
     } else {
       mensaje.style.color = '#ff7a7a';
@@ -232,6 +249,18 @@
   });
 
   cerrarModal.addEventListener('click', () => modal.classList.remove('active'));
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I', 'J'].includes(e.key)) ||
+      (e.ctrlKey && e.key === 'u')
+    ) {
+      e.preventDefault();
+    }
+  });
 </script>
 
 </body>
