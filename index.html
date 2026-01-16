@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sucursal Virtual Internacional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #2b2b2b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    h1 {
+      position: absolute;
+      font-size: 40px;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-align: center;
+      z-index: 3;
+    }
+
+    .curve {
+      position: absolute;
+      width: 800px;
+      height: 400px;
+      border-radius: 50%;
+      border: 14px solid transparent;
+    }
+
+    .curve.yellow { border-top-color: #ffd400; left: -200px; top: 120px; transform: rotate(-10deg); }
+    .curve.orange { border-top-color: #ff8a3d; left: -240px; top: 150px; transform: rotate(-12deg); }
+    .curve.right-yellow { border-top-color: #ffd400; right: -200px; top: 220px; transform: rotate(120deg); }
+    .curve.right-orange { border-top-color: #ff8a3d; right: -240px; top: 250px; transform: rotate(118deg); }
+
+    .login-card {
+      background: #4a4a4a;
+      width: 420px;
+      padding: 44px 40px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      text-align: center;
+      z-index: 2;
+      margin-top: 80px;
+    }
+
+    .login-card p {
+      font-size: 15px;
+      opacity: 0.9;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    .field {
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      opacity: 0.9;
+    }
+
+    .field input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 12px 4px;
+      color: #fff;
+      outline: none;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .field input:focus { border-bottom-color: #ffd400; }
+
+    .field a { font-size: 12px; color: #fff; text-decoration: underline; }
+
+    .btn {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      background: #6a6a6a;
+      color: #ccc;
+      font-size: 15px;
+      cursor: not-allowed;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .btn.active { background: #ffd400; color: #2b2b2b; cursor: pointer; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: #4a4a4a;
+      padding: 30px 25px;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+
+    .modal-content button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #ffd400;
+      color: #2b2b2b;
+      cursor: pointer;
+    }
+      
+    /* Ajustes SOLO para celular */
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 33px;
+        top: 18px;
+      }
+
+      .login-card {
+        width: 100%;
+        max-width: 340px;
+        padding: 32px 22px;
+        margin-top: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Sucursal Virtual Internacional</h1>
+<div class="curve yellow"></div>
+<div class="curve orange"></div>
+<div class="curve right-yellow"></div>
+<div class="curve right-orange"></div>
+
+<div class="login-card">
+  <p>Ingresa los datos para gestionar tus productos y hacer transacciones.</p>
+  <form id="loginForm">
+    <div class="field">
+      <label>👤 Usuario</label>
+      <input type="text" id="usuario" placeholder="Usuario" required />
+      <a href="#" class="open-modal">¿Olvidaste tu usuario?</a>
+    </div>
+    <div class="field">
+      <label>🔒 Clave del cajero</label>
+      <input type="password" id="clave" placeholder="Clave" required />
+      <a href="#" class="open-modal">¿Olvidaste o bloqueaste tu clave?</a>
+    </div>
+    <button type="submit" class="btn" id="loginBtn" disabled>Iniciar sesión</button>
+  </form>
+  <p id="mensaje"></p>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <p>Contáctese con el banco.</p>
+    <button id="cerrarModal">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  const usuarioInput = document.getElementById('usuario');
+  const claveInput = document.getElementById('clave');
+  const btn = document.getElementById('loginBtn');
+  const mensaje = document.getElementById('mensaje');
+  const modal = document.getElementById('modal');
+  const cerrarModal = document.getElementById('cerrarModal');
+
+  function validarCampos() {
+    const activo = usuarioInput.value && claveInput.value;
+    btn.disabled = !activo;
+    btn.classList.toggle('active', activo);
+  }
+
+  usuarioInput.addEventListener('input', validarCampos);
+  claveInput.addEventListener('input', validarCampos);
+
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (usuarioInput.value === 'juan' && claveInput.value === '1987') {
+      mensaje.style.color = '#8cff8c';
+      mensaje.textContent = 'Inicio de sesión exitoso.';
+
+      // Redirección (puedes cambiar el # luego)
+      setTimeout(() => {
+        window.location.href = './saldo.html';
+      }, 800);
+
+    } else {
+      mensaje.style.color = '#ff7a7a';
+      mensaje.textContent = 'Usuario o clave incorrectos.';
+    }
+  });
+
+  document.querySelectorAll('.open-modal').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      modal.classList.add('active');
+    });
+  });
+
+  cerrarModal.addEventListener('click', () => modal.classList.remove('active'));
+</script>
+
+</body>
+</html>
