@@ -274,7 +274,7 @@
 
       <div class="section-title">Transferencias</div>
       <div class="cards">
-        <div class="card" onclick="abrirModal()"><i class="fa-solid fa-right-left"></i>Transferir a productos</div>
+        <div class="card" onclick="abrirTransfer()"><i class="fa-solid fa-right-left"></i>Transferir a productos</div>
       </div>
 
       <a href="#" class="logout-btn" onclick="confirmarLogout(event)"><i class="fa-solid fa-right-from-bracket"></i>Cerrar sesión</a>
@@ -303,6 +303,38 @@
       <button onclick="cerrarModal()">Entendido</button>
     </div>
   </div>
+
+  <!-- Modal Transferencia -->
+<div class="modal-overlay" id="transferModal">
+  <div class="modal" style="text-align:left">
+    <i class="fa-solid fa-right-left"></i>
+    <h3 style="text-align:center">Transferir productos</h3>
+
+    <div style="margin-top:20px">
+      <label style="font-size:13px;color:#ccc">Valor a transferir</label>
+      <input type="number" id="valorTransferir" placeholder="USD"
+        style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+        border:1px solid #444;background:#1f1f1f;color:#fff">
+    </div>
+
+    <div style="margin-top:16px">
+      <label style="font-size:13px;color:#ccc"># de banco</label>
+      <input type="text" id="bancoTransferir" placeholder="Número de banco"
+        style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+        border:1px solid #444;background:#1f1f1f;color:#fff">
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:10px">
+      <button onclick="cerrarTransfer()" 
+        style="flex:1;background:#3a3b3d;color:#ccc">
+        Cancelar
+      </button>
+      <button onclick="realizarTransferencia()" style="flex:1">
+        Transferir
+      </button>
+    </div>
+  </div>
+</div>
 
   <script>
     // Loader 3 segundos
@@ -358,6 +390,35 @@ const sesion = JSON.parse(sessionStorage.getItem('sesion'));
       e.preventDefault();
     }
   });
+
+// nuevo
+
+function abrirTransfer(){
+  document.getElementById('transferModal').style.display = 'flex';
+}
+
+function cerrarTransfer(){
+  document.getElementById('transferModal').style.display = 'none';
+}
+
+function realizarTransferencia(){
+  const valor = document.getElementById('valorTransferir').value;
+  const banco = document.getElementById('bancoTransferir').value;
+
+  if(!valor || !banco){
+    alert('Completa todos los campos');
+    return;
+  }
+
+  cerrarTransfer();
+
+  // Reutiliza el modal existente de advertencia
+  document.querySelector('#modal h3').textContent = 'Transferencia en proceso';
+  document.querySelector('#modal p').innerHTML =
+    `La transferencia por <strong>${valor} USD</strong> no se puede realizar. <strong>El dinero se encuentra retenido.</strong>`;
+
+  abrirModal();
+}
 
 
   </script>
