@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sucursal Virtual Internacional</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Luxon for Colombia Time -->
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif}
+    body{background:#2b2b2b;color:#fff;display:flex}
+    /* Main */
+    .main{flex:1}
+
+    /* Header */
+    header{
+      height:64px;
+      background:#2f2f2f;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 24px;
+      border-bottom:2px solid #f2c300
+    }
+    .brand{display:flex;align-items:center;gap:16px;font-weight:600}
+    .brand span{opacity:.8}
+
+    .header-right{display:flex;align-items:center;gap:12px;font-size:14px;color:#ddd}
+    .avatar{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      background:#3a3b3d;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#cfcfcf;
+      border:1px solid #4a4a4a
+    }
+    .avatar i{font-size:14px}
+    .divider{width:1px;height:20px;background:#555}
+
+    /* Content */
+    .content{padding:48px 72px}
+
+    h1{font-size:28px;margin-bottom:24px}
+
+    .section-title{margin:24px 0 16px;font-weight:500}
+
+    /* Cards */
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .card{
+      background:#3a3b3d;
+      border-radius:12px;
+      padding:20px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      cursor:pointer;
+      transition:.2s
+    }
+    .card:hover{background:#444}
+    .card i{font-size:22px;color:#f2c300}
+
+    /* Saldo */
+    .products{
+      background:#3a3b3d;
+      border-radius:12px;
+      padding:40px 20px;
+      text-align:center
+    }
+    .saldo-label{font-size:14px;color:#ccc;margin-bottom:8px}
+    .saldo-valor{
+      font-size:48px;
+      font-weight:700;
+      color:#f2c300;
+      opacity:0;
+      transform:translateY(10px) scale(.95);
+      animation:saldoIn .8s ease-out forwards
+    }
+    @keyframes saldoIn{
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    .estado-info{
+      margin-top:20px;
+      display:flex;
+      justify-content:center;
+      gap:16px;
+      font-size:12px;
+      color:#aaa;
+      flex-wrap:wrap
+    }
+    .estado-info i{color:#6fdc8c}
+
+    /* Footer helper */
+    .help{
+      position:fixed;
+      bottom:24px;
+      right:24px;
+      background:#f2c300;
+      color:#000;
+      padding:12px 18px;
+      border-radius:24px;
+      font-weight:600
+    }
+
+    /* Logout */
+    .logout-btn{
+      margin:32px auto 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 20px;
+      border-radius:10px;
+      background:transparent;
+      border:1px solid #555;
+      color:#bbb;
+      text-decoration:none;
+      font-weight:500;
+      transition:.2s
+    }
+    .logout-btn:hover{background:#333;color:#fff;border-color:#c0392b}
+
+    /* Mobile responsive */
+    @media (max-width: 768px){
+      body{flex-direction:column}
+      .sidebar{display:none}
+      header{padding:0 16px}
+      .brand span{display:none}
+      .content{padding:24px 16px}
+      h1{font-size:22px}
+      .products{padding:28px 16px}
+      .saldo-valor{font-size:36px}
+      .cards{grid-template-columns:1fr}
+      .card{padding:16px}
+      .modal{width:90%}
+    }
+
+    /* Modal */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:999
+    }
+    .modal{
+      background:#2f2f2f;
+      border-radius:14px;
+      width:360px;
+      padding:24px;
+      text-align:center;
+      box-shadow:0 10px 40px rgba(0,0,0,.5)
+    }
+    .modal i{font-size:36px;color:#f2c300;margin-bottom:16px}
+    .modal h3{margin-bottom:8px;font-weight:600}
+    .modal p{font-size:14px;color:#ccc;margin-bottom:20px}
+    .modal button{
+      background:#f2c300;
+      border:none;
+      padding:10px 18px;
+      border-radius:8px;
+      font-weight:600;
+      cursor:pointer
+    }
+  
+    /* Loader */
+    .loader-overlay{
+      position:fixed;
+      inset:0;
+      background:#2b2b2b;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:2000;
+      flex-direction:column;
+      gap:16px
+    }
+    .loader-spinner{
+      width:48px;
+      height:48px;
+      border:4px solid #444;
+      border-top:4px solid #f2c300;
+      border-radius:50%;
+      animation:spin 1s linear infinite
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loader-text{font-size:22px;color:#ccc}
+  </style>
+</head>
+<body>
+
+  <!-- Loader -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Cargando información bancaria…</div>
+  </div>
+
+  <div class="main">
+    <header>
+      <div class="brand">
+        <strong>Bancocolombia</strong>
+        <span>Sucursal Virtual Internacional</span>
+      </div>
+      <div class="header-right">
+        <div class="avatar"><i class="fa-solid fa-user"></i></div>
+        <span>Claudia Xiomara Hernández vega</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="top-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h1 style="margin:0">Hola, Claudia</h1>
+        <div style="text-align:right">
+          <div id="hora" style="font-size:14px;color:#ccc"></div>
+          <div class="conexion-segura" style="margin-top:4px;font-size:12px;color:#6fdc8c;display:flex;align-items:center;gap:6px;justify-content:flex-end">
+            <i class="fa-solid fa-lock"></i>
+            Conexión segura
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="width:100%;margin-bottom:32px;cursor:default">
+        <i class="fa-solid fa-circle-exclamation" style="color:#f2c300"></i>
+        <div>
+          <strong>Advertencia</strong>
+          <div style="font-size:13px;color:#ccc;margin-top:4px">
+            El saldo de tu cuenta se encuentra retenido por verificación de obligaciones tributarias pendientes. Los movimientos están temporalmente inhabilitados, realiza tu pago.
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Saldo disponible</div>
+      <div class="products">
+        <div class="saldo-label">Saldo disponible</div>
+        <div class="saldo-valor" id="saldo">3'829.938 USD</div>
+      </div>
+
+      <div class="section-title">Transferencias</div>
+      <div class="cards">
+        <div class="card" onclick="abrirTransfer()"><i class="fa-solid fa-right-left"></i>Transferir a productos</div>
+      </div>
+
+      <a href="#" class="logout-btn" onclick="confirmarLogout(event)"><i class="fa-solid fa-right-from-bracket"></i>Cerrar sesión</a>
+            
+    </div>
+
+    <!-- Modal Logout -->
+    <div class="modal-overlay" id="logoutModal">
+      <div class="modal">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <h3>¿Deseas cerrar sesión?</h3>
+        <p>Tu sesión actual se cerrará de forma segura.</p>
+        <button onclick="cerrarLogout()">Cancelar</button>
+        <button style="margin-left:8px;background:#c0392b;color:#fff" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <h3>Dinero retenido</h3>
+      <p>El monto <strong>3'829.938 USD</strong> está retenido.<br>Realice el pago para continuar con la transferencia.</p>
+      <button onclick="cerrarModal()">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Modal Transferencia -->
+<div class="modal-overlay" id="transferModal">
+  <div class="modal" style="text-align:left">
+  <i class="fa-solid fa-right-left"></i>
+  <h3 style="text-align:center">Transferir productos</h3>
+
+  <!-- 1. Valor a transferir (YA EXISTE, SIN CAMBIOS) -->
+  <div style="margin-top:20px">
+    <label style="font-size:13px;color:#ccc">Valor a transferir</label>
+    <input type="number" id="valorTransferir" placeholder="USD"
+      style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+      border:1px solid #444;background:#1f1f1f;color:#fff">
+  </div>
+
+  <!-- 2. Seleccionar banco -->
+  <div style="margin-top:16px">
+    <label style="font-size:13px;color:#ccc">Banco</label>
+    <select id="bancoSeleccionado"
+      style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+      border:1px solid #444;background:#1f1f1f;color:#fff">
+      <option value="">Selecciona un banco</option>
+      <option>Bank of America</option>
+      <option>Bancolombia</option>
+      <option>Banco de Bogotá</option>
+      <option>BBVA Colombia</option>
+      <option>Banco de Occidente</option>
+      <option>Banco Popular</option>
+      <option>Banco Ficohsa</option>
+      <option>Banco Atlántida</option>
+      <option>BAC Credomatic Honduras</option>
+      <option>Banco de Occidente (Honduras)</option>
+      <option>Banpaís</option>
+      <option>Banco Industrial</option>
+      <option>Banrural</option>
+      <option>BAC Credomatic Guatemala</option>
+      <option>Banco Promerica</option>
+      <option>BBVA México</option>
+      <option>Banorte</option>
+      <option>Banco Azteca</option>
+      <option>Banco Metropolitano</option>
+      <option>Banco Popular de Ahorro (BPA)</option>
+      <option>Banco de Crédito y Comercio (BANDEC)</option>
+      <option>Banco Internacional de Comercio (BICSA)</option>
+      <option>Banco Agrícola</option>
+      <option>Banco Cuscatlán</option>
+      <option>BAC Credomatic El Salvador</option>
+      <option>Banco Promerica El Salvador</option>
+      <option>Chase Bank</option>
+      <option>Citibank (Citigroup)</option>
+      <option>Citibanamex</option>
+      <option>Davivienda</option>
+      <option>Davivienda El Salvador</option>
+      <option>G&T Continental</option>
+      <option>HSBC México</option>
+      <option>JPMorgan Chase</option>
+      <option>PNC Bank</option>  
+      <option>Scotiabank Colpatria</option>
+      <option>Santander México</option>
+      <option>Truist Bank</option>
+      <option>U.S. Bank</option>
+      <option>Wells Fargo</option>
+      <option>Otros</option>                        
+    </select>
+  </div>
+
+  <!-- Campo banco personalizado (OCULTO) -->
+<div id="otroBancoContainer" style="margin-top:16px; display:none;">
+  <label style="font-size:13px;color:#ccc">Nombre del banco</label>
+  <input type="text" id="otroBanco"
+    placeholder="Escribe el nombre del banco"
+    style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+    border:1px solid #444;background:#1f1f1f;color:#fff">
+</div>
+
+  <!-- 3. Tipo de cuenta -->
+  <div style="margin-top:16px">
+    <label style="font-size:13px;color:#ccc">Tipo de cuenta</label>
+    <select id="tipoCuenta"
+      style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+      border:1px solid #444;background:#1f1f1f;color:#fff">
+      <option value="">Selecciona tipo de cuenta</option>
+      <option>Cuenta de ahorros</option>
+      <option>Cuenta corriente</option>
+    </select>
+  </div>
+
+    <!-- Checkbox Número ruta -->
+<div style="margin-top:16px">
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#ccc;cursor:pointer">
+    <input type="checkbox" id="checkRuta">
+    Número ruta
+  </label>
+</div>
+
+<!-- Campo Número ruta (OCULTO) -->
+<div id="rutaContainer" style="margin-top:12px; display:none;">
+  <label style="font-size:13px;color:#ccc">Número ruta</label>
+  <input type="text" id="numeroRuta"
+    placeholder="Escribe el número de ruta"
+    style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+    border:1px solid #444;background:#1f1f1f;color:#fff">
+</div>
+
+  <!-- 4. Número de cuenta (YA EXISTE, SIN CAMBIOS) -->
+  <div style="margin-top:16px">
+    <label style="font-size:13px;color:#ccc">Número de cuenta</label>
+    <input type="text" id="bancoTransferir" placeholder="Número de cuenta"
+      style="width:100%;margin-top:6px;padding:10px;border-radius:8px;
+      border:1px solid #444;background:#1f1f1f;color:#fff">
+  </div>
+
+
+
+  <!-- Mensaje de error -->
+<div id="transferError"
+  style="display:none;margin-top:12px;font-size:13px;color:#ff6b6b;text-align:center">
+  Completa todos los campos
+</div>
+
+  <div style="margin-top:24px;display:flex;gap:10px">
+    <button onclick="cerrarTransfer()" 
+      style="flex:1;background:#3a3b3d;color:#ccc">
+      Cancelar
+    </button>
+    <button onclick="realizarTransferencia()" style="flex:1">
+      Transferir
+    </button>
+  </div>
+</div>
+</div>
+
+  <script>
+    // Loader 3 segundos
+    window.addEventListener('load', ()=>{
+      setTimeout(()=>{
+        const loader = document.getElementById('loader');
+        if(loader) loader.style.display = 'none';
+      },2000);
+    });
+    const { DateTime } = luxon;
+    luxon.Settings.defaultLocale = 'es';
+    function actualizarHora(){
+      const ahora = DateTime.now().setZone('America/Chicago');
+      document.getElementById('hora').textContent = ahora.toFormat("cccc, d 'de' LLLL 'de' yyyy, h:mm a");
+    }
+    actualizarHora();
+    setInterval(actualizarHora, 60000);
+
+    function abrirModal(){
+      document.getElementById('modal').style.display = 'flex';
+    }
+    function cerrarModal(){
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function confirmarLogout(e){
+      e.preventDefault();
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+    function cerrarLogout(){
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+    function cerrarSesion(){
+      window.location.href = './index.html';
+      sessionStorage.removeItem('sesion');
+    }
+
+const sesion = JSON.parse(sessionStorage.getItem('sesion'));
+
+  if (!sesion || !sesion.autenticado) {
+    window.location.href = './index.html';
+    sessionStorage.removeItem('sesion');
+  }
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I', 'J'].includes(e.key)) ||
+      (e.ctrlKey && e.key === 'u')
+    ) {
+      e.preventDefault();
+    }
+  });
+
+// nuevo
+
+function abrirTransfer(){
+  document.getElementById('transferModal').style.display = 'flex';
+  document.getElementById('transferError').style.display = 'none';
+
+  checkRuta.checked = false;
+  rutaContainer.style.display = 'none';
+  numeroRutaInput.value = '';
+}
+
+function cerrarTransfer(){
+  document.getElementById('transferModal').style.display = 'none';
+  document.getElementById('transferError').style.display = 'none';
+
+  checkRuta.checked = false;
+  rutaContainer.style.display = 'none';
+  numeroRutaInput.value = '';
+  
+}
+
+function realizarTransferencia(){
+  const valor = document.getElementById('valorTransferir').value;
+  let banco = document.getElementById('bancoSeleccionado').value;
+  const tipoCuenta = document.getElementById('tipoCuenta').value;
+  const numeroCuenta = document.getElementById('bancoTransferir').value;
+  const otroBanco = document.getElementById('otroBanco').value;
+  const error = document.getElementById('transferError');
+
+  error.style.display = 'none';
+
+  if (banco === 'Otros') {
+    if (!otroBanco) {
+      error.textContent = 'Escribe el nombre del banco';
+      error.style.display = 'block';
+      return;
+    }
+    banco = otroBanco;
+  }
+
+  if(!valor || !banco || !tipoCuenta || !numeroCuenta){
+    error.textContent = 'Completa todos los campos';
+    error.style.display = 'block';
+    return;
+  }
+
+  cerrarTransfer();
+
+  document.querySelector('#modal h3').textContent = 'No se puede realizar la transferencia';
+  document.querySelector('#modal p').innerHTML =
+    `La transferencia por <strong>${valor} USD</strong> a <strong>${banco}</strong>
+     ${tipoCuenta} no se puede realizar.<br>
+     <strong>El dinero se encuentra retenido.</strong>`;
+
+  abrirModal();
+}
+
+
+const bancoSelect = document.getElementById('bancoSeleccionado');
+const otroBancoContainer = document.getElementById('otroBancoContainer');
+const otroBancoInput = document.getElementById('otroBanco');
+
+bancoSelect.addEventListener('change', () => {
+  if (bancoSelect.value === 'Otros') {
+    otroBancoContainer.style.display = 'block';
+  } else {
+    otroBancoContainer.style.display = 'none';
+    otroBancoInput.value = '';
+  }
+});
+
+const checkRuta = document.getElementById('checkRuta');
+const rutaContainer = document.getElementById('rutaContainer');
+const numeroRutaInput = document.getElementById('numeroRuta');
+
+checkRuta.addEventListener('change', () => {
+  if (checkRuta.checked) {
+    rutaContainer.style.display = 'block';
+  } else {
+    rutaContainer.style.display = 'none';
+    numeroRutaInput.value = '';
+  }
+});
+
+  </script>
+
+</body>
+</html>
